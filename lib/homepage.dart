@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -36,7 +37,11 @@ class _MyHomePageState extends State<MyHomePage> {
   void _toggleOptions() {
     setState(() {
       _isIconCross = !_isIconCross;
-      _showOptions = !_showOptions;
+      Timer(const Duration(milliseconds: 250), () {
+        setState(() {
+          _showOptions = !_showOptions;
+        });
+      });
     });
   }
 
@@ -58,7 +63,7 @@ class _MyHomePageState extends State<MyHomePage> {
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
                 curve: Curves.easeInOut,
-                height: _showOptions ? h * 0.26 : 0,
+                height: _isIconCross ? h * 0.26 : 0,
                 width: w * 0.6,
                 decoration: BoxDecoration(
                   color: const Color(0xff7e83e0),
@@ -102,39 +107,36 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       floatingActionButton: Padding(
-        padding: EdgeInsets.only(top: h * 0.07),
+        padding: EdgeInsets.only(top: h * 0.065),
         child: Stack(
           alignment: Alignment.center,
           children: [
             InkWell(
               onTap: _toggleOptions,
               child: Container(
-                height: w * 0.17,
-                width: w * 0.17,
-                decoration: BoxDecoration(
-                    color: const Color(0xff7e83e0),
-                    borderRadius: _isIconCross
-                        ? const BorderRadius.only(
-                            topLeft: Radius.circular(0),
-                            topRight: Radius.circular(0),
-                            bottomLeft: Radius.circular(20),
-                            bottomRight: Radius.circular(20),
-                          )
-                        : BorderRadius.circular(20)),
-                child: _isIconCross
-                    ? const Icon(
-                        Icons.close,
-                        key: Key('cross'),
-                        color: Colors.white,
-                        size: 35,
-                      )
-                    : const Icon(
-                        Icons.add,
-                        key: Key('add'),
-                        color: Colors.white,
-                        size: 35,
-                      ),
-              ),
+                  height: w * 0.16,
+                  width: w * 0.17,
+                  decoration: BoxDecoration(
+                      color: const Color(0xff7e83e0),
+                      borderRadius: _isIconCross
+                          ? _showOptions
+                              ? const BorderRadius.only(
+                                  topLeft: Radius.circular(0),
+                                  topRight: Radius.circular(0),
+                                  bottomLeft: Radius.circular(20),
+                                  bottomRight: Radius.circular(20),
+                                )
+                              : BorderRadius.circular(20)
+                          : BorderRadius.circular(20)),
+                  child: AnimatedRotation(
+                    duration: const Duration(milliseconds: 300),
+                    turns: _isIconCross ? 0.50 : 0,
+                    child: const Icon(
+                      Icons.add,
+                      color: Colors.white,
+                      size: 35,
+                    ),
+                  )),
             ),
           ],
         ),
@@ -142,18 +144,40 @@ class _MyHomePageState extends State<MyHomePage> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: Stack(
         children: [
-          !_isIconCross
-              ? const SizedBox()
-              : AnimatedPositioned(
-                  duration: const Duration(milliseconds: 300),
-                  top: 0,
-                  left: MediaQuery.of(context).size.width / 3,
-                  child: Container(
-                    height: 50,
-                    width: w * 0.4,
-                    color: const Color(0xff7e83e0),
-                  ),
-                ),
+          Positioned(
+            top: 0,
+            left: MediaQuery.of(context).size.width / 3,
+            child: AnimatedOpacity(
+              duration: const Duration(milliseconds: 350),
+              opacity: _isIconCross ? 0 : 1,
+              child: Container(height: 50, width: w * 0.4, color: Colors.white),
+            ),
+          ),
+          Positioned(
+            top: 0,
+            left: MediaQuery.of(context).size.width / 3,
+            child: AnimatedOpacity(
+              duration: Duration(
+                  milliseconds: _isIconCross
+                      ? 0
+                      : _showOptions
+                          ? 0
+                          : 100),
+              curve: Curves.bounceInOut,
+              opacity: _isIconCross
+                  ? 1
+                  : _showOptions
+                      ? 1
+                      : 0,
+              child: AnimatedContainer(
+                duration: Duration(milliseconds: _showOptions ? 300 : 0),
+                curve: Curves.easeInOut,
+                height: 50,
+                width: w * 0.4,
+                color: const Color(0xff7e83e0),
+              ),
+            ),
+          ),
           ClipRRect(
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(25),
@@ -161,7 +185,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             child: BottomAppBar(
               shape: const CircularNotchedRectangle(),
-              notchMargin: 3,
+              notchMargin: 4,
               height: 70,
               child: Stack(
                 alignment: Alignment.center,
